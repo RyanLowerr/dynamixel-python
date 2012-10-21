@@ -29,7 +29,7 @@ class dynamixel:
 		self.serial = serial.Serial(port, baud)
 
 	def checksum(self, packet):
-	check = 0
+		check = 0
 		for i in range(DYNAMIXEL_ID, (packet[DYNAMIXEL_LENGTH] + 3)):
 			check += packet[i]
 		return 255 - (check % 256)
@@ -43,22 +43,26 @@ class dynamixel:
 		txp[txlength - 1] = self.checksum(txp)
 
 		for i in range(txlength):
-			serial.write(chr(txp[i]))
+			self.serial.write(chr(txp[i]))
 
 		if txp[DYNAMIXEL_INSTRUCTION] != 254:
-			if txp[DYNAMIXEL_INSTRUCTION] == DYNAMIXEL_READ: rxlength = txp[DYNAMIXEL_PARAMETER + 1] + 6
-			else: rxlength = 6
+			if txp[DYNAMIXEL_INSTRUCTION] == DYNAMIXEL_READ: 
+				rxlength = txp[DYNAMIXEL_PARAMETER + 1] + 6
+			else: 
+				rxlength = 6
 
 			time.sleep(.02)
-			for x in range(serial.inWaiting()): rxp[x] = ord(serial.read())
-			for x in range(txlength + 1): rxp.pop(0)
+			
+			for x in range(self.serial.inWaiting()): 
+				rxp[x] = ord(self.serial.read())
 
-			if rxp[0] != 255 and rxp[1] != 255: return -2
-			if rxp[rxlength - 1] != checksum(rxp): return -3
-	
-			return 1
+			if rxp[0] != 255 and rxp[1] != 255: 
+				return DYNAMIXEL_RX_CORRUPT
+			
+			if rxp[rxlength - 1] != self.checksum(rxp): 
+				return DYNAMIXEL_RX_CORRUPT
 
-		return 1
+		return DYNAMIXEL_SUCCESS
 
 	def ping(self, id):
 		txpacket = [0]*8
@@ -112,7 +116,7 @@ class dynamixel:
 		length = end_addr - start_addr + 1	
 
 		txpacket = [0]*8
-		rxpacket = [0]*30
+		rxpacket = [0]*(length + 10)
 		table = [0]*length
 
 		txpacket[DYNAMIXEL_ID] = id
@@ -121,11 +125,11 @@ class dynamixel:
 		txpacket[DYNAMIXEL_PARAMETER] = start_addr
 		txpacket[DYNAMIXEL_PARAMETER + 1] = length
 
-		result = self.txrx(txpacket, rxpacket) 
+		result = self.txrx(txpacket, rxpacket)
 
 		if(result == DYNAMIXEL_SUCCESS):
 			for i in range(length):
-				table[i] = rxpacket[DYNAMIXEL_PARAMETER + 1]
+				table[i] = rxpacket[DYNAMIXEL_PARAMETER + i]
 
 		return result, table
 
@@ -154,4 +158,41 @@ class dynamixel:
 
 		return self.txrx(txpacket, rxpacket)
 
+dynamixel = dynamixel("/dev/ttyUSB0", 1000000)
+result, table = dynamixel.readtable(1, 0, 49)
 
+if result == DYNAMIXEL_SUCCESS:
+	print " MODEL NUMBER            " + str(table[0] + (table[1] << 8))
+	print " VERSION                 " + str(table[2])
+	print " ID                      " + str(table[3])
+	print " BAUD RATE               " + str(table[4])
+	print " RETURN DELAY TIME       " + str(table[5])
+	print " CW ANGLE LIMIT          " + str(table[6] + (table[7] << 8))
+	print " CCW ANGLE LIMIT         " + str(table[8] + (table[9] << 8))
+	print " LIMIT TEMPERATURE       " + str(table[11])
+	print " LOW LIMIT VOLTAGE       " + str(table[12])
+	print " HIGH LIMIT VOLTAGE      " + str(table[13])
+	print " MAX TORQUE              " + str(table[14] + (table[15] << 8))
+	print " RETURN LEVEL            " + str(table[16])
+	print " ALARM LED               " + str(table[17])
+	print " ALARM SHUTDOWN          " + str(table[18])
+	print " DOWN CALIBRATION        " + str(table[20] + (table[21] << 8))
+	print " UP CALIBRATION          " + str(table[22] + (table[23] << 8))
+	print " TORQUE ENABLE           " + str(table[24])
+	print " LED                     " + str(table[25])
+	print " CW COMPLIANCE MARGIN    " + str(table[26])
+	print " CCW COMPLIANCE MARGIN   " + str(table[27])
+	print " CW COMPLIANCE SLOPE     " + str(table[28])
+	print " CCW COMPLIANCE SLOPE    " + str(table[29])
+	print " GOAL POSITION           " + str(table[30] + (table[31] << 8))
+	print " GOAL SPEED              " + str(table[32] + (table[33] << 8))
+	print " TORQUE LIMIT            " + str(table[34] + (table[35] << 8))
+	print " PRESENT POSITION        " + str(table[36] + (table[37] << 8))
+	print " PRESENT SPEED           " + str(table[38] + (table[39] << 8))
+	print " PRESENT LOAD            " + str(table[40] + (table[41] << 8))
+	print " PRESENT VOLTAGE         " + str(table[42])
+	print " PRESENT TEMPERATURE     " + str(table[43])
+	print " REGISTERED INSTRUCTION  " + str(table[44])
+	print " MOVING                  " + str(table[46])
+	print " LOCK                    " + str(table[47])
+	print " PUNCH                   " + str(table[48] + (table[49] << 8))
