@@ -1,27 +1,78 @@
 import serial
 import time
 
-DYNAMIXEL_ID	       = 2
-DYNAMIXEL_LENGTH       = 3
-DYNAMIXEL_INSTRUCTION  = 4
-DYNAMIXEL_ERROR	       = 4
-DYNAMIXEL_PARAMETER    = 5
+DYNAMIXEL_ID	          = 2
+DYNAMIXEL_LENGTH          = 3
+DYNAMIXEL_INSTRUCTION     = 4
+DYNAMIXEL_ERROR	          = 4
+DYNAMIXEL_PARAMETER       = 5
 
-DYNAMIXEL_BROADCAST_ID = 254
+DYNAMIXEL_BROADCAST_ID    = 254
 
-DYNAMIXEL_PING	       = 1
-DYNAMIXEL_READ	       = 2
-DYNAMIXEL_WRITE	       = 3
-DYNAMIXEL_REG_WRITE    = 4
-DYNAMIXEL_ACTION       = 5
-DYNAMIXEL_RESET	       = 6
-DYNAMIXEL_SYNC_WRITE   = 131
+DYNAMIXEL_PING	          = 1
+DYNAMIXEL_READ	          = 2
+DYNAMIXEL_WRITE	          = 3
+DYNAMIXEL_REG_WRITE       = 4
+DYNAMIXEL_ACTION          = 5
+DYNAMIXEL_RESET	          = 6
+DYNAMIXEL_SYNC_WRITE      = 131
 
-DYNAMIXEL_SUCCESS      = 1
-DYNAMIXEL_RX_CORRUPT   = 2
-DYNAMIXEL_RX_TIMEOUT   = 3
-DYNAMIXEL_TX_FAIL      = 4
-DYNAMIXEL_TX_TIMEOUT   = 5
+DYNAMIXEL_SUCCESS         = 1
+DYNAMIXEL_RX_CORRUPT      = 2
+DYNAMIXEL_RX_TIMEOUT      = 3
+DYNAMIXEL_TX_FAIL         = 4
+DYNAMIXEL_TX_TIMEOUT      = 5
+
+# AX Control Table
+AX_MODEL_NUMBER_L         = 0
+AX_MODEL_NUMBER_H         = 1
+AX_VERSION                = 2
+AX_SERVO_ID               = 3
+X_BAUD_RATE               = 4
+AX_RETURN_DELAY_TIME      = 5
+AX_CW_ANGLE_LIMIT_L       = 6
+AX_CW_ANGLE_LIMIT_H       = 7
+AX_CCW_ANGLE_LIMIT_L      = 8
+AX_CCW_ANGLE_LIMIT_H      = 9
+AX_LIMIT_TEMPERATURE      = 11
+AX_LOW_LIMIT_VOLTAGE      = 12
+AX_HIGH_LIMIT_VOLTAGE     = 13
+AX_MAX_TORQUE_L           = 14
+AX_MAX_TORQUE_H           = 15
+AX_RETURN_LEVEL           = 16
+AX_ALARM_LED              = 17
+AX_ALARM_SHUTDOWN         = 18
+AX_DOWN_CALIBRATION_L     = 20
+AX_DOWN_CALIBRATION_H     = 21
+AX_UP_CALIBRATION_L       = 22
+AX_UP_CALIBRATION_H       = 23
+AX_TORQUE_ENABLE          = 24
+AX_LED                    = 25
+AX_CW_COMPLIANCE_MARGIN   = 26
+AX_CCW_COMPLIANCE_MARGIN  = 27
+AX_CW_COMPLIANCE_SLOPE    = 28
+AX_CCW_COMPLIANCE_SLOPE   = 29
+AX_GOAL_POSITION_L        = 30
+AX_GOAL_POSITION_H        = 31
+AX_GOAL_SPEED_L           = 32
+AX_GOAL_SPEED_H           = 33
+AX_TORQUE_LIMIT_L         = 34
+AX_TORQUE_LIMIT_H         = 35
+AX_PRESENT_POSITION_L     = 36
+AX_PRESENT_POSITION_H     = 37
+AX_PRESENT_SPEED_L        = 38
+AX_PRESENT_SPEED_H        = 39
+AX_PRESENT_LOAD_L         = 40
+AX_PRESENT_LOAD_H         = 41
+AX_PRESENT_VOLTAGE        = 42
+AX_PRESENT_TEMPERATURE    = 43
+AX_REGISTERED_INSTRUCTION = 44
+AX_MOVING                 = 46
+AX_LOCK                   = 47
+AX_PUNCH_L                = 48
+AX_PUNCH_H                = 49
+
+# MX Control Table
 
 class dynamixel:
 
@@ -157,42 +208,3 @@ class dynamixel:
 		txpacket[DYNAMIXEL_PARAMETER + 2] = (value & 0xff00) >> 8
 
 		return self.txrx(txpacket, rxpacket)
-
-dynamixel = dynamixel("/dev/ttyUSB0", 1000000)
-result, table = dynamixel.readtable(1, 0, 49)
-
-if result == DYNAMIXEL_SUCCESS:
-	print " MODEL NUMBER            " + str(table[0] + (table[1] << 8))
-	print " VERSION                 " + str(table[2])
-	print " ID                      " + str(table[3])
-	print " BAUD RATE               " + str(table[4])
-	print " RETURN DELAY TIME       " + str(table[5])
-	print " CW ANGLE LIMIT          " + str(table[6] + (table[7] << 8))
-	print " CCW ANGLE LIMIT         " + str(table[8] + (table[9] << 8))
-	print " LIMIT TEMPERATURE       " + str(table[11])
-	print " LOW LIMIT VOLTAGE       " + str(table[12])
-	print " HIGH LIMIT VOLTAGE      " + str(table[13])
-	print " MAX TORQUE              " + str(table[14] + (table[15] << 8))
-	print " RETURN LEVEL            " + str(table[16])
-	print " ALARM LED               " + str(table[17])
-	print " ALARM SHUTDOWN          " + str(table[18])
-	print " DOWN CALIBRATION        " + str(table[20] + (table[21] << 8))
-	print " UP CALIBRATION          " + str(table[22] + (table[23] << 8))
-	print " TORQUE ENABLE           " + str(table[24])
-	print " LED                     " + str(table[25])
-	print " CW COMPLIANCE MARGIN    " + str(table[26])
-	print " CCW COMPLIANCE MARGIN   " + str(table[27])
-	print " CW COMPLIANCE SLOPE     " + str(table[28])
-	print " CCW COMPLIANCE SLOPE    " + str(table[29])
-	print " GOAL POSITION           " + str(table[30] + (table[31] << 8))
-	print " GOAL SPEED              " + str(table[32] + (table[33] << 8))
-	print " TORQUE LIMIT            " + str(table[34] + (table[35] << 8))
-	print " PRESENT POSITION        " + str(table[36] + (table[37] << 8))
-	print " PRESENT SPEED           " + str(table[38] + (table[39] << 8))
-	print " PRESENT LOAD            " + str(table[40] + (table[41] << 8))
-	print " PRESENT VOLTAGE         " + str(table[42])
-	print " PRESENT TEMPERATURE     " + str(table[43])
-	print " REGISTERED INSTRUCTION  " + str(table[44])
-	print " MOVING                  " + str(table[46])
-	print " LOCK                    " + str(table[47])
-	print " PUNCH                   " + str(table[48] + (table[49] << 8))
